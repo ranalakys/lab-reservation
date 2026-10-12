@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Research Lab Reservations — AU Kuwait</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🔬</text></svg>">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<!-- ── AUTH SCREEN ── -->
+<div id="auth-screen" class="auth-screen">
+  <div class="auth-card">
+    <div class="auth-logo">🔬</div>
+    <h1 class="auth-title">Research Lab Reservations</h1>
+    <p class="auth-subtitle">American University of Kuwait</p>
+    <div id="auth-form-wrap">
+      <p class="auth-desc">Enter your AU email to receive a sign-in link. No password needed.</p>
+      <div class="fg">
+        <input class="fi" id="auth-email" type="email" placeholder="you@au.edu.kw" autocomplete="email">
+        <div class="fe" id="auth-email-err">Please enter a valid @au.edu.kw email address.</div>
+      </div>
+      <button class="btn-primary full-width" id="auth-btn" onclick="sendMagicLink()">Send sign-in link</button>
+    </div>
+    <div id="auth-sent" style="display:none">
+      <div class="auth-sent-icon">📬</div>
+      <p class="auth-sent-title">Check your email</p>
+      <p class="auth-sent-sub">We sent a sign-in link to <strong id="auth-sent-email"></strong>.<br>Click the link in the email to continue.</p>
+      <button class="btn-ghost full-width" style="margin-top:16px" onclick="resetAuthForm()">Use a different email</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── APP ── -->
+<div id="app" style="display:none">
+
+  <!-- HEADER -->
+  <header class="app-header">
+    <div class="hdr-row">
+      <div class="hdr-left">
+        <div class="hdr-logo">🔬</div>
+        <div>
+          <div class="hdr-title">Lab Reservations</div>
+          <div class="hdr-uni">American University of Kuwait</div>
+        </div>
+      </div>
+      <div class="hdr-right">
+        <button class="admin-btn" id="admin-toggle-btn" onclick="goAdmin()" style="display:none">
+          Admin
+          <span class="notif-dot" id="admin-notif-dot"></span>
+        </button>
+        <button class="icon-btn" id="signout-btn" onclick="signOut()" title="Sign out">⏏</button>
+      </div>
+    </div>
+  </header>
+
+  <!-- PAGES -->
+  <div id="page-home"></div>
+  <div id="page-book" style="display:none"></div>
+  <div id="page-notifs" style="display:none"></div>
+
+  <!-- ADMIN VIEW -->
+  <div id="admin-view" style="display:none">
+    <div class="tabs">
+      <button class="tab-btn active" onclick="adminTab('approvals')" id="atab-approvals">Approvals</button>
+      <button class="tab-btn" onclick="adminTab('staff')" id="atab-staff">Staff</button>
+      <button class="tab-btn" onclick="adminTab('classes')" id="atab-classes">Classes</button>
+      <button class="tab-btn" onclick="adminTab('semester')" id="atab-semester">Semester</button>
+      <button class="tab-btn" onclick="adminTab('export')" id="atab-export">Export</button>
+    </div>
+    <div class="admin-wrap">
+      <div id="apanel-approvals">
+        <div class="sec-head"><span class="sec-label">Pending requests</span></div>
+        <div id="pending-list"><div class="loading-state"><div class="spinner"></div>Loading…</div></div>
+        <div class="sec-head" style="margin-top:20px"><span class="sec-label">Recent decisions</span></div>
+        <div id="decided-list"></div>
+      </div>
+      <div id="apanel-staff" style="display:none">
+        <div class="sec-head"><span class="sec-label">Staff members</span><button class="small-btn small-btn-ok" onclick="openStaffModal()">+ Add</button></div>
+        <div id="staff-list"></div>
+      </div>
+      <div id="apanel-classes" style="display:none">
+        <div class="sec-head"><span class="sec-label">Class blocks</span><button class="small-btn small-btn-ok" onclick="openClassModal()">+ Add</button></div>
+        <div id="class-list"></div>
+      </div>
+      <div id="apanel-semester" style="display:none">
+        <div class="sec-head"><span class="sec-label">Current semester</span></div>
+        <div class="sem-form">
+          <div class="fg"><label class="fl">Semester name</label><input class="fi" id="sem-name" placeholder="e.g. Fall 2025"></div>
+          <div class="fg"><label class="fl">Start date</label><input class="fi" id="sem-start" type="date"></div>
+          <div class="fg"><label class="fl">End date</label><input class="fi" id="sem-end" type="date"></div>
+          <button class="btn-primary full-width" style="margin-top:4px" onclick="saveSemester()">Save semester</button>
+        </div>
+      </div>
+      <div id="apanel-export" style="display:none">
+        <div class="sec-head"><span class="sec-label">Export reservations</span></div>
+        <button class="export-btn" onclick="exportCSV('all')">📄 All reservations (CSV)</button>
+        <button class="export-btn" onclick="exportCSV('approved')">✅ Approved only (CSV)</button>
+        <button class="export-btn" onclick="exportCSV('pending')">⏳ Pending only (CSV)</button>
+        <div class="sec-head" style="margin-top:20px"><span class="sec-label">Summary</span></div>
+        <div id="export-summary"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- BOTTOM NAV -->
+  <nav class="bottom-nav" id="bottom-nav">
+    <button class="nav-item active" id="nav-home" onclick="navigate('home')">
+      <span class="nav-icon">🏠</span><span>Home</span>
+    </button>
+    <button class="nav-item" id="nav-book" onclick="navigate('book')">
+      <span class="nav-icon">📅</span><span>Book</span>
+    </button>
+    <button class="nav-item" id="nav-notifs" onclick="navigate('notifs')">
+      <span class="nav-icon">🔔</span><span>Updates</span>
+      <span class="nav-badge" id="notif-badge"></span>
+    </button>
+  </nav>
+</div>
+
+<!-- ══════════ MODALS ══════════ -->
+
+<!-- Reserve -->
+<div id="modal-res" class="overlay hidden" onclick="closeOnBg(event,'modal-res')">
+  <div class="sheet">
+    <div class="handle"></div>
+    <div class="modal-title" id="res-title">Request reservation</div>
+    <div class="modal-sub" id="res-sub">—</div>
+    <div class="fg"><label class="fl">Unit / Course</label><input class="fi" id="r-unit" placeholder="e.g. CIVE 301" autocomplete="off"><div class="fe" id="e-unit">Required.</div></div>
+    <div class="fg"><label class="fl">Section</label><input class="fi" id="r-section" placeholder="e.g. Section 03" autocomplete="off"><div class="fe" id="e-section">Required.</div></div>
+    <div class="fg"><label class="fl">Student IDs</label><input class="fi" id="r-ids" placeholder="20241001, 20241002, 20241003" autocomplete="off"><div class="fh">Comma-separated. All students who will use the lab.</div><div class="fe" id="e-ids">Enter at least one ID.</div></div>
+    <div class="fg"><label class="fl">Team name (optional)</label><input class="fi" id="r-team" placeholder="e.g. Team Alpha" autocomplete="off"></div>
+    <div class="mfoot">
+      <button class="btn-ghost flex1" onclick="closeModal('modal-res')">Cancel</button>
+      <button class="btn-primary flex1" id="res-confirm-btn" onclick="submitReservation()">Submit request</button>
+    </div>
+  </div>
+</div>
+
+<!-- Approve/Reject -->
+<div id="modal-approve" class="overlay hidden" onclick="closeOnBg(event,'modal-approve')">
+  <div class="sheet">
+    <div class="handle"></div>
+    <div class="modal-title">Review request</div>
+    <div class="modal-sub" id="appr-sub">—</div>
+    <div id="appr-details"></div>
+    <div class="fg" style="margin-top:14px"><label class="fl">Message to student (optional)</label><input class="fi" id="appr-note" placeholder="e.g. Approved — please confirm with the lab engineer on arrival"></div>
+    <div class="mfoot">
+      <button class="btn-ghost flex1" onclick="closeModal('modal-approve')">Cancel</button>
+      <button class="btn-danger flex1" onclick="decideReservation('rejected')">Reject</button>
+      <button class="btn-primary flex1" onclick="decideReservation('approved')">Approve</button>
+    </div>
+  </div>
+</div>
+
+<!-- Cancel -->
+<div id="modal-cancel" class="overlay hidden" onclick="closeOnBg(event,'modal-cancel')">
+  <div class="sheet">
+    <div class="handle"></div>
+    <div class="modal-title">Cancel reservation?</div>
+    <div class="modal-sub">Your slot will be freed and cannot be recovered.</div>
+    <div class="mfoot">
+      <button class="btn-ghost flex1" onclick="closeModal('modal-cancel')">Keep it</button>
+      <button class="btn-danger flex1" onclick="doCancel()">Yes, cancel</button>
+    </div>
+  </div>
+</div>
+
+<!-- Staff -->
+<div id="modal-staff" class="overlay hidden" onclick="closeOnBg(event,'modal-staff')">
+  <div class="sheet">
+    <div class="handle"></div>
+    <div class="modal-title" id="staff-modal-title">Add staff member</div>
+    <div class="modal-sub">Working days and hours determine when slots are available for booking.</div>
+    <div class="fg"><label class="fl">Full name</label><input class="fi" id="sf-name" placeholder="e.g. Dr. Amina Hasan"><div class="fe" id="e-sfname">Required.</div></div>
+    <div class="fg"><label class="fl">Role</label><select class="fi" id="sf-role"><option value="engineer">Lab Engineer</option><option value="technician">Technician</option></select></div>
+    <div class="fg"><label class="fl">Lab</label><select class="fi" id="sf-lab"><option value="lab-a">Structural Lab</option><option value="lab-b">Civil Lab</option></select></div>
+    <div class="fg">
+      <label class="fl">Working days</label>
+      <div class="day-names"><span class="day-name">Su</span><span class="day-name">Mo</span><span class="day-name">Tu</span><span class="day-name">We</span><span class="day-name">Th</span><span class="day-name">Fr</span><span class="day-name">Sa</span></div>
+      <div class="day-grid" id="sf-days">
+        <div class="day-cell off" data-day="0" onclick="toggleDay(this)">Su</div>
+        <div class="day-cell on"  data-day="1" onclick="toggleDay(this)">Mo</div>
+        <div class="day-cell on"  data-day="2" onclick="toggleDay(this)">Tu</div>
+        <div class="day-cell on"  data-day="3" onclick="toggleDay(this)">We</div>
+        <div class="day-cell on"  data-day="4" onclick="toggleDay(this)">Th</div>
+        <div class="day-cell on"  data-day="5" onclick="toggleDay(this)">Fr</div>
+        <div class="day-cell off" data-day="6" onclick="toggleDay(this)">Sa</div>
+      </div>
+    </div>
+    <div style="display:flex;gap:10px">
+      <div class="fg" style="flex:1"><label class="fl">Start</label><input class="fi" id="sf-start" type="time" value="08:00"></div>
+      <div class="fg" style="flex:1"><label class="fl">End</label><input class="fi" id="sf-end" type="time" value="17:00"></div>
+    </div>
+    <div class="mfoot"><button class="btn-ghost flex1" onclick="closeModal('modal-staff')">Cancel</button><button class="btn-primary flex1" onclick="saveStaff()">Save</button></div>
+  </div>
+</div>
+
+<!-- Class -->
+<div id="modal-class" class="overlay hidden" onclick="closeOnBg(event,'modal-class')">
+  <div class="sheet">
+    <div class="handle"></div>
+    <div class="modal-title" id="class-modal-title">Add class block</div>
+    <div class="modal-sub">This time block repeats every week this semester.</div>
+    <div class="fg"><label class="fl">Class name</label><input class="fi" id="cl-name" placeholder="e.g. CIVE 301 Lab Section 02"><div class="fe" id="e-clname">Required.</div></div>
+    <div class="fg"><label class="fl">Lab</label><select class="fi" id="cl-lab"><option value="lab-a">Structural Lab</option><option value="lab-b">Civil Lab</option></select></div>
+    <div class="fg"><label class="fl">Day of week</label>
+      <select class="fi" id="cl-day">
+        <option value="0">Sunday</option><option value="1">Monday</option><option value="2">Tuesday</option>
+        <option value="3">Wednesday</option><option value="4">Thursday</option><option value="5">Friday</option><option value="6">Saturday</option>
+      </select>
+    </div>
+    <div style="display:flex;gap:10px">
+      <div class="fg" style="flex:1"><label class="fl">Start</label><input class="fi" id="cl-start" type="time" value="08:00"></div>
+      <div class="fg" style="flex:1"><label class="fl">End</label><input class="fi" id="cl-end" type="time" value="09:30"></div>
+    </div>
+    <div class="mfoot"><button class="btn-ghost flex1" onclick="closeModal('modal-class')">Cancel</button><button class="btn-primary flex1" onclick="saveClass()">Save</button></div>
+  </div>
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast"></div>
+
+<!-- Supabase SDK -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="js/config.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>
