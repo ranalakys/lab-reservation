@@ -5,10 +5,10 @@
 
 const CONFIG = {
   // Supabase project URL — looks like: https://xxxxxxxxxxxx.supabase.co
-  SUPABASE_URL: 'YOUR_SUPABASE_URL',
+  SUPABASE_URL: 'sb_publishable_BYvNuLBIwehbb_Y_eee7XQ_Y83G2y-6',
 
   // Supabase anon/public key — safe to expose in frontend code
-  SUPABASE_ANON_KEY: 'YOUR_SUPABASE_ANON_KEY',
+  SUPABASE_ANON_KEY: 'sb_secret_RciM2RC3YzICWOvonXWxoQ_pLUzluZ_',
 
   // Your university email domain — only this domain can sign in
   ALLOWED_EMAIL_DOMAIN: '@au.edu.kw',
@@ -16,8 +16,9 @@ const CONFIG = {
   // Admin emails — these users see the Admin panel
   // Add as many as needed
   ADMIN_EMAILS: [
-    'admin@au.edu.kw',
-    // 'labcoordinator@au.edu.kw',
+    'r.lakys@au.edu.kw',
+    'a.jumaah@au.edu.kw',
+    'a.alnouri@au.edu.kw'
   ],
 
   // Lab definitions
