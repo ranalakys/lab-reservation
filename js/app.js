@@ -4,7 +4,8 @@
 // ─────────────────────────────────────────────────────────────────
 
 // ── Supabase client ───────────────────────────────────────────────
-const supabase = window.supabase.createClient(
+const { createClient } = window.supabase;
+const supabase = createClient(
   CONFIG.SUPABASE_URL,
   CONFIG.SUPABASE_ANON_KEY
 );
